@@ -7,7 +7,6 @@ interface PalindromeStrategy {
 }
 
 class StackStrategy implements PalindromeStrategy {
-
     @Override
     public boolean isPalindrome(String text) {
         Stack<Character> stack = new Stack<>();
@@ -18,16 +17,13 @@ class StackStrategy implements PalindromeStrategy {
         }
 
         for (char ch : normalized.toCharArray()) {
-            if (ch != stack.pop()) {
-                return false;
-            }
+            if (ch != stack.pop()) return false;
         }
         return true;
     }
 }
 
 class DequeStrategy implements PalindromeStrategy {
-
     @Override
     public boolean isPalindrome(String text) {
         Deque<Character> deque = new ArrayDeque<>();
@@ -38,39 +34,45 @@ class DequeStrategy implements PalindromeStrategy {
         }
 
         while (deque.size() > 1) {
-            if (!deque.removeFirst().equals(deque.removeLast())) {
-                return false;
-            }
+            if (!deque.removeFirst().equals(deque.removeLast())) return false;
         }
         return true;
     }
 }
 
-public class PalindromeCheckerApp {
+class TwoPointerStrategy implements PalindromeStrategy {
+    @Override
+    public boolean isPalindrome(String text) {
+        String normalized = text.replaceAll("\\s+", "").toLowerCase();
+        int start = 0;
+        int end = normalized.length() - 1;
 
-    private PalindromeStrategy strategy;
-
-    public PalindromeCheckerApp(PalindromeStrategy strategy) {
-        this.strategy = strategy;
-    }
-
-    public void check(String text) {
-        if (strategy.isPalindrome(text)) {
-            System.out.println("Palindrome");
-        } else {
-            System.out.println("Not a palindrome");
+        while (start < end) {
+            if (normalized.charAt(start) != normalized.charAt(end)) return false;
+            start++;
+            end--;
         }
+        return true;
     }
+}
+
+class PalindromePerformanceTest {
 
     public static void main(String[] args) {
-        String text = "Racecar";
+        String text = "A man a plan a canal Panama";
 
-        // Using Stack strategy
-        PalindromeCheckerApp app1 = new PalindromeCheckerApp(new StackStrategy());
-        app1.check(text);
+        runTest("StackStrategy", new StackStrategy(), text);
+        runTest("DequeStrategy", new DequeStrategy(), text);
+        runTest("TwoPointerStrategy", new TwoPointerStrategy(), text);
+    }
 
-        // Using Deque strategy
-        PalindromeCheckerApp app2 = new PalindromeCheckerApp(new DequeStrategy());
-        app2.check(text);
+    private static void runTest(String name, PalindromeStrategy strategy, String text) {
+        long startTime = System.nanoTime();
+        boolean result = strategy.isPalindrome(text);
+        long endTime = System.nanoTime();
+        long duration = endTime - startTime;
+
+        System.out.println(name + " => Result: " + (result ? "Palindrome" : "Not a palindrome")
+                + ", Time: " + duration + " ns");
     }
 }
